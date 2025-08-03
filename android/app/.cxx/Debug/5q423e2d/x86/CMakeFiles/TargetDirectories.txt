@@ -1,0 +1,2 @@
+C:/Users/SohAil MAnzoor/Desktop/My Workspace/Flutter Lectures/Thirteen-Firestore-Database/android/app/.cxx/Debug/5q423e2d/x86/CMakeFiles/edit_cache.dir
+C:/Users/SohAil MAnzoor/Desktop/My Workspace/Flutter Lectures/Thirteen-Firestore-Database/android/app/.cxx/Debug/5q423e2d/x86/CMakeFiles/rebuild_cache.dir

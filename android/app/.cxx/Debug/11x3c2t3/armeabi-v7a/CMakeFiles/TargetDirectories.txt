@@ -1,0 +1,2 @@
+C:/Users/sohai/Desktop/My Workspace/Flutter Lectures/thirteen_firestore_database/android/app/.cxx/Debug/11x3c2t3/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/sohai/Desktop/My Workspace/Flutter Lectures/thirteen_firestore_database/android/app/.cxx/Debug/11x3c2t3/armeabi-v7a/CMakeFiles/rebuild_cache.dir

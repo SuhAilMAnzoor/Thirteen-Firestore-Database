@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "157762622714",
+    "project_id": "thirteen-firestore-data-base",
+    "storage_bucket": "thirteen-firestore-data-base.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:157762622714:android:cba7f11f3f0dce8f102543",
+        "android_client_info": {
+          "package_name": "com.sohail.thirteen_firestore_database"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACwaTaZtQ4FOaQR-9Pinpsvc4ZlaqLkWg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
