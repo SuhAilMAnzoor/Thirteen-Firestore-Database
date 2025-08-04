@@ -9,7 +9,7 @@ class Adduser extends StatefulWidget {
 }
 
 class _AdduserState extends State<Adduser> {
-// This function adds a user to the Firestore database under the "Users" collection
+// This function adds a user to the Firestore database under the "users" collection
 // with a hardcoded name and contact number. It uses the `add` method to create a new document
 // and handles success and error cases with print statements. You can replace these with
 // more user-friendly notifications like a snackbar or toast.
