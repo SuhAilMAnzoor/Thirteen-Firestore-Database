@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:thirteen_firestore_database/firebase_options.dart';
-import 'package:thirteen_firestore_database/screens/login_screen.dart';
+import 'package:thirteen_firestore_database/screens/addUser.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +21,6 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         debugShowCheckedModeBanner: false,
-        home: const LoginScreen());
+        home: const Adduser());
   }
 }
