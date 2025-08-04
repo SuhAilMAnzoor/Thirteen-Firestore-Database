@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:thirteen_firestore_database/firebase_options.dart';
 import 'package:thirteen_firestore_database/screens/login_screen.dart';
-import 'package:thirteen_firestore_database/screens/retrieve_user_data_from_User.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
