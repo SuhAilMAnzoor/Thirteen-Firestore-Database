@@ -1,7 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:thirteen_firestore_database/screens/getUserName.dart';
 import 'package:thirteen_firestore_database/screens/registerscreen.dart';
+import 'package:thirteen_firestore_database/screens/retrieve_user_data_from_User.dart';
+
 import '../utill/ElevatedButtonColors.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -35,19 +38,38 @@ class _LoginScreenState extends State<LoginScreen> {
         isLogin = true; // Show loading indicator
       });
 
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      // Sign in
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text,
       );
-      // After successful login, get the UID of the logged-in user
-      String getUserLoginUID = FirebaseAuth.instance.currentUser!.uid;
 
-      // If Successful, Navigate to the User Page
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) => GetUserName(documentId: getUserLoginUID)),
-      );
+      // Get UID of logged-in user
+      String uid = credential.user!.uid;
+
+      // ✅ Check if user is admin from Firestore
+      final doc =
+          await FirebaseFirestore.instance.collection('Users').doc(uid).get();
+
+      final data = doc.data();
+
+      if (data != null && data['isAdmin'] == true) {
+        // ✅ Navigate to Admin Panel
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const RetrieveUserDataFromUser(),
+          ),
+        );
+      } else {
+        // ✅ Navigate to normal user screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GetUserName(documentId: uid),
+          ),
+        );
+      }
     } catch (e) {
       setState(() {
         isLogin = false;
@@ -66,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
         message = "An unexpected error occurred.";
       }
 
-      // Display Error Message
+      // Display error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
