@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:thirteen_firestore_database/screens/retrieve_user_data_from_User.dart';
+import 'package:thirteen_firestore_database/screens/retrieve_users_data_for_admin.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -57,7 +57,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       Navigator.pop(
         context,
         MaterialPageRoute(
-            builder: (context) => const RetrieveUserDataFromUser()),
+            builder: (context) => const RetrieveUsersDataForAdmin()),
       );
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
