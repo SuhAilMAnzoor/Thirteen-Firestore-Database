@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => const RetrieveUserDataFromUser(),
+            builder: (context) => const RetrieveUsersDataForAdmin(),
           ),
         );
       } else {
