@@ -6,15 +6,15 @@ import 'package:thirteen_firestore_database/screens/getUserName.dart';
 import 'package:thirteen_firestore_database/screens/profile_screen.dart';
 import 'package:thirteen_firestore_database/screens/login_screen.dart';
 
-class RetrieveUserDataFromUser extends StatefulWidget {
-  const RetrieveUserDataFromUser({super.key});
+class RetrieveUsersDataForAdmin extends StatefulWidget {
+  const RetrieveUsersDataForAdmin({super.key});
 
   @override
-  State<RetrieveUserDataFromUser> createState() =>
-      _RetrieveUserDataFromUserState();
+  State<RetrieveUsersDataForAdmin> createState() =>
+      _RetrieveUsersDataForAdminState();
 }
 
-class _RetrieveUserDataFromUserState extends State<RetrieveUserDataFromUser> {
+class _RetrieveUsersDataForAdminState extends State<RetrieveUsersDataForAdmin> {
   final CollectionReference users =
       FirebaseFirestore.instance.collection('Users');
   String searchQuery = '';
@@ -162,7 +162,7 @@ class _RetrieveUserDataFromUserState extends State<RetrieveUserDataFromUser> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => const RetrieveUserDataFromUser()));
+                            builder: (_) => const RetrieveUsersDataForAdmin()));
                   },
                 ),
               const Divider(),
