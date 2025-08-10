@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:thirteen_firestore_database/screens/getUserName.dart';
 import 'package:thirteen_firestore_database/screens/registerscreen.dart';
-import 'package:thirteen_firestore_database/screens/retrieve_user_data_from_User.dart';
+import 'package:thirteen_firestore_database/screens/retrieve_users_data_for_admin.dart';
 
 import '../utill/ElevatedButtonColors.dart';
 
