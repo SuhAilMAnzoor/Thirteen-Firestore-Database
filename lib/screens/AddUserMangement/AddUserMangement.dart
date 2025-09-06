@@ -1,8 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:thirteen_firestore_database/screens/getUserName.dart';
+import 'package:thirteen_firestore_database/screens/get_user_name.dart';
 
+// import this file into main.dart file by using its class name
+// This is different from this project but are similar to the project
+// This is Users/Employees Book where you can store Employess/User Details
+// This is like RegisterBook
 class AddUserMangement extends StatefulWidget {
   const AddUserMangement({super.key});
 
