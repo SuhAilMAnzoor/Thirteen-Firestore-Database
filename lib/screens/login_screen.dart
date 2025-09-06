@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:thirteen_firestore_database/screens/getUserName.dart';
-import 'package:thirteen_firestore_database/screens/registerscreen.dart';
+import 'package:thirteen_firestore_database/screens/get_user_name.dart';
+import 'package:thirteen_firestore_database/screens/register_screen.dart';
 import 'package:thirteen_firestore_database/screens/admin_panel.dart';
 
 import '../utill/ElevatedButtonColors.dart';
