@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:thirteen_firestore_database/screens/login_screen.dart';
 import 'package:thirteen_firestore_database/screens/edit_profile_screen.dart';
-import 'package:thirteen_firestore_database/screens/profile_screen.dart';
 
 class GetUserName extends StatefulWidget {
   final String? documentId;
