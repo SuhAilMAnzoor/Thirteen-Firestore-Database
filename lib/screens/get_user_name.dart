@@ -3,30 +3,34 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:thirteen_firestore_database/screens/login_screen.dart';
 import 'package:thirteen_firestore_database/screens/edit_profile_screen.dart';
+import 'package:thirteen_firestore_database/screens/profile_screen.dart';
 
-class GetUserName extends StatelessWidget {
+class GetUserName extends StatefulWidget {
   final String? documentId;
 
   const GetUserName({super.key, this.documentId});
 
   @override
+  State<GetUserName> createState() => _GetUserNameState();
+}
+
+class _GetUserNameState extends State<GetUserName> {
+  @override
   Widget build(BuildContext context) {
     final User? currentUser = FirebaseAuth.instance.currentUser;
     final String uid = currentUser?.uid ?? '';
-    final String docIdToFetch = documentId ?? uid;
+    final String docIdToFetch = widget.documentId ?? uid;
 
     // Collections
     final usersMain = FirebaseFirestore.instance.collection('Users');
-    final usersAlt = FirebaseFirestore.instance.collection('users');
+    final usersFromAddUserManagement =
+        FirebaseFirestore.instance.collection('users');
 
-    // Determine if the viewer is the owner (same uid) AND via email/password auth
-    final providers = currentUser?.providerData ?? const [];
-    // Be robust: if providerData is empty but email exists, treat as email/password
-    final bool isEmailPasswordAuth = providers.isEmpty
-        ? (currentUser?.email != null)
-        : providers.any((p) => p.providerId == 'password');
-
+    // Who is viewing?
     final bool isOwnerOfPage = currentUser != null && docIdToFetch == uid;
+    final bool isEmailPasswordAuth =
+        currentUser?.providerData.any((p) => p.providerId == 'password') ??
+            false;
     final bool showOwnerOptions = isOwnerOfPage && isEmailPasswordAuth;
 
     return FutureBuilder<DocumentSnapshot>(
@@ -34,66 +38,52 @@ class GetUserName extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+              body: Center(child: CircularProgressIndicator()));
         }
 
         if (snapshot.hasError) {
           return const Scaffold(
-            body: Center(child: Text("Something went wrong")),
-          );
+              body: Center(child: Text("Something went wrong")));
         }
 
         if (snapshot.hasData && snapshot.data!.exists) {
-          final data = (snapshot.data!.data() as Map<String, dynamic>?) ??
-              <String, dynamic>{};
+          final data = (snapshot.data!.data() as Map<String, dynamic>?) ?? {};
           return _buildUserDetailScreen(
-            context: context,
-            data: data,
-            showOwnerOptions: showOwnerOptions,
-            ownerUid: uid,
-          );
+              context, data, docIdToFetch, showOwnerOptions);
         }
 
-        // Fallback to 'users' collection (AddUserMangement)
+        // Fallback to 'users' collection
         return FutureBuilder<DocumentSnapshot>(
-          future: usersAlt.doc(docIdToFetch).get(),
+          future: usersFromAddUserManagement.doc(docIdToFetch).get(),
           builder: (context, alt) {
             if (alt.connectionState == ConnectionState.waiting) {
               return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
+                  body: Center(child: CircularProgressIndicator()));
             }
             if (alt.hasError) {
               return const Scaffold(
-                body: Center(child: Text("Something went wrong")),
-              );
+                  body: Center(child: Text("Something went wrong")));
             }
             if (!alt.hasData || !alt.data!.exists) {
               return const Scaffold(
                 body: Center(child: Text("User document not found.")),
               );
             }
-            final data = (alt.data!.data() as Map<String, dynamic>?) ??
-                <String, dynamic>{};
+            final data = (alt.data!.data() as Map<String, dynamic>?) ?? {};
             return _buildUserDetailScreen(
-              context: context,
-              data: data,
-              showOwnerOptions: showOwnerOptions,
-              ownerUid: uid,
-            );
+                context, data, docIdToFetch, showOwnerOptions);
           },
         );
       },
     );
   }
 
-  Widget _buildUserDetailScreen({
-    required BuildContext context,
-    required Map<String, dynamic> data,
-    required bool showOwnerOptions,
-    required String ownerUid,
-  }) {
+  Widget _buildUserDetailScreen(
+    BuildContext context,
+    Map<String, dynamic> data,
+    String docIdToFetch,
+    bool showOwnerOptions,
+  ) {
     final String first =
         (data['first_name'] ?? data['name'] ?? '').toString().trim();
     final String last = (data['last_name'] ?? '').toString().trim();
@@ -132,26 +122,29 @@ class GetUserName extends StatelessWidget {
                     : null,
               ),
             ),
-            // My Profile — always visible
+
+            // Always show My Profile (just closes drawer; you're already on a profile)
             ListTile(
               leading: const Icon(Icons.person),
               title: const Text('My Profile'),
               onTap: () {
-                Navigator.pop(context); // close drawer; you're already here
+                Navigator.pop(context);
               },
             ),
-            // Only for owner via email/password
+
+            // Only for owner (email/password) -> show Edit Profile & Logout
             if (showOwnerOptions)
               ListTile(
                 leading: const Icon(Icons.edit),
                 title: const Text('Edit Profile'),
-                onTap: () {
+                onTap: () async {
                   Navigator.pop(context);
-                  Navigator.push(
+                  await Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (_) => const EditProfileScreen()),
                   );
+                  setState(() {});
                 },
               ),
             if (showOwnerOptions) const Divider(),
@@ -161,6 +154,7 @@ class GetUserName extends StatelessWidget {
                 title: const Text('Logout'),
                 onTap: () async {
                   await FirebaseAuth.instance.signOut();
+                  // Go to login after logout
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -187,11 +181,9 @@ class GetUserName extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "User Details",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
+                    const Text("User Details",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 20),
                     _readonlyField(
                         "First Name", first.isNotEmpty ? first : 'N/A'),
@@ -199,28 +191,26 @@ class GetUserName extends StatelessWidget {
                     _readonlyField("Last Name", last.isNotEmpty ? last : 'N/A'),
                     const SizedBox(height: 15),
                     _readonlyField(
-                      "Age",
-                      (data['age']?.toString() ?? '').isNotEmpty
-                          ? data['age'].toString()
-                          : 'N/A',
-                    ),
+                        "Age",
+                        (data['age']?.toString() ?? '').isNotEmpty
+                            ? data['age'].toString()
+                            : 'N/A'),
                     const SizedBox(height: 15),
                     _readonlyField(
-                      "Phone Number",
-                      ((data['phone_number'] ?? data['contact'] ?? '')
-                              .toString()
-                              .trim()
-                              .isNotEmpty)
-                          ? (data['phone_number'] ?? data['contact']).toString()
-                          : 'N/A',
-                    ),
+                        "Phone Number",
+                        ((data['phone_number'] ?? data['contact'] ?? '')
+                                .toString()
+                                .trim()
+                                .isNotEmpty)
+                            ? (data['phone_number'] ?? data['contact'])
+                                .toString()
+                            : 'N/A'),
                     const SizedBox(height: 15),
                     _readonlyField(
-                      "Address",
-                      (data['address'] ?? '').toString().trim().isNotEmpty
-                          ? data['address'].toString()
-                          : 'N/A',
-                    ),
+                        "Address",
+                        (data['address'] ?? '').toString().trim().isNotEmpty
+                            ? data['address'].toString()
+                            : 'N/A'),
                     const SizedBox(height: 15),
                     _readonlyField("Email", userEmail),
                   ],
@@ -228,20 +218,20 @@ class GetUserName extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 30),
-            // Bottom button — label & action differ by context
+            // Bottom button:
+            // Owner(email/password): label "Back to User List" but performs LOGOUT
+            // From AddUserManagement: label "Back to User List" and just pops back
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () async {
                   if (showOwnerOptions) {
-                    // OWNER (email/password): LOGOUT
                     await FirebaseAuth.instance.signOut();
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(builder: (_) => const LoginScreen()),
                     );
                   } else {
-                    // From AddUserMangement: just go back
                     Navigator.pop(context);
                   }
                 },
@@ -258,10 +248,10 @@ class GetUserName extends StatelessWidget {
     return TextFormField(
       initialValue: value.isNotEmpty ? value : 'N/A',
       readOnly: true,
-      decoration: const InputDecoration(
-        labelText: '',
-        border: OutlineInputBorder(),
-      ).copyWith(labelText: label),
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
     );
   }
 }
