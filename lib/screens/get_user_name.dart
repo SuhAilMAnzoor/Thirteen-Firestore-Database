@@ -20,12 +20,14 @@ class _GetUserNameState extends State<GetUserName> {
     final String uid = currentUser?.uid ?? '';
     final String docIdToFetch = widget.documentId ?? uid;
 
-    // Collections
+    // Firebase Cloud Storage Collections >>> for Auth and Add User Mangement Users
+    //  For Auth Collection
     final usersMain = FirebaseFirestore.instance.collection('Users');
+    //  For Add User Mangement Collection
     final usersFromAddUserManagement =
         FirebaseFirestore.instance.collection('users');
 
-    // Who is viewing?
+    // Who is Virewing
     final bool isOwnerOfPage = currentUser != null && docIdToFetch == uid;
     final bool isEmailPasswordAuth =
         currentUser?.providerData.any((p) => p.providerId == 'password') ??
@@ -51,24 +53,24 @@ class _GetUserNameState extends State<GetUserName> {
               context, data, docIdToFetch, showOwnerOptions);
         }
 
-        // Fallback to 'users' collection
+        // If Users are not from Firebase Auth Email and Password  Return the Users From Add User Mangement
         return FutureBuilder<DocumentSnapshot>(
           future: usersFromAddUserManagement.doc(docIdToFetch).get(),
-          builder: (context, alt) {
-            if (alt.connectionState == ConnectionState.waiting) {
+          builder: (context, snap) {
+            if (snap.connectionState == ConnectionState.waiting) {
               return const Scaffold(
                   body: Center(child: CircularProgressIndicator()));
             }
-            if (alt.hasError) {
+            if (snap.hasError) {
               return const Scaffold(
                   body: Center(child: Text("Something went wrong")));
             }
-            if (!alt.hasData || !alt.data!.exists) {
+            if (!snap.hasData || !snap.data!.exists) {
               return const Scaffold(
                 body: Center(child: Text("User document not found.")),
               );
             }
-            final data = (alt.data!.data() as Map<String, dynamic>?) ?? {};
+            final data = (snap.data!.data() as Map<String, dynamic>?) ?? {};
             return _buildUserDetailScreen(
                 context, data, docIdToFetch, showOwnerOptions);
           },
@@ -121,8 +123,6 @@ class _GetUserNameState extends State<GetUserName> {
                     : null,
               ),
             ),
-
-            // Always show My Profile (just closes drawer; you're already on a profile)
             ListTile(
               leading: const Icon(Icons.person),
               title: const Text('My Profile'),
@@ -131,7 +131,7 @@ class _GetUserNameState extends State<GetUserName> {
               },
             ),
 
-            // Only for owner (email/password) -> show Edit Profile & Logout
+            // Show only for Firebase Auth User (email/password)  Edit Profile & Logout Buttons
             if (showOwnerOptions)
               ListTile(
                 leading: const Icon(Icons.edit),
@@ -143,7 +143,8 @@ class _GetUserNameState extends State<GetUserName> {
                     MaterialPageRoute(
                         builder: (_) => const EditProfileScreen()),
                   );
-                  setState(() {});
+                  setState(
+                      () {}); // When editing the information update the User Profile Screen to show changes
                 },
               ),
             if (showOwnerOptions) const Divider(),
@@ -153,7 +154,6 @@ class _GetUserNameState extends State<GetUserName> {
                 title: const Text('Logout'),
                 onTap: () async {
                   await FirebaseAuth.instance.signOut();
-                  // Go to login after logout
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -165,80 +165,75 @@ class _GetUserNameState extends State<GetUserName> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Card(
-              elevation: 4,
-              color: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("User Details",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 20),
-                    _readonlyField(
-                        "First Name", first.isNotEmpty ? first : 'N/A'),
-                    const SizedBox(height: 15),
-                    _readonlyField("Last Name", last.isNotEmpty ? last : 'N/A'),
-                    const SizedBox(height: 15),
-                    _readonlyField(
-                        "Age",
-                        (data['age']?.toString() ?? '').isNotEmpty
-                            ? data['age'].toString()
-                            : 'N/A'),
-                    const SizedBox(height: 15),
-                    _readonlyField(
-                        "Phone Number",
-                        ((data['phone_number'] ?? data['contact'] ?? '')
-                                .toString()
-                                .trim()
-                                .isNotEmpty)
-                            ? (data['phone_number'] ?? data['contact'])
-                                .toString()
-                            : 'N/A'),
-                    const SizedBox(height: 15),
-                    _readonlyField(
-                        "Address",
-                        (data['address'] ?? '').toString().trim().isNotEmpty
-                            ? data['address'].toString()
-                            : 'N/A'),
-                    const SizedBox(height: 15),
-                    _readonlyField("Email", userEmail),
-                  ],
-                ),
+        child: ListView(children: [
+          Card(
+            elevation: 4,
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("User Details",
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 20),
+                  _readonlyField(
+                      "First Name", first.isNotEmpty ? first : 'N/A'),
+                  const SizedBox(height: 15),
+                  _readonlyField("Last Name", last.isNotEmpty ? last : 'N/A'),
+                  const SizedBox(height: 15),
+                  _readonlyField(
+                      "Age",
+                      (data['age']?.toString() ?? '').isNotEmpty
+                          ? data['age'].toString()
+                          : 'N/A'),
+                  const SizedBox(height: 15),
+                  _readonlyField(
+                      "Phone Number",
+                      ((data['phone_number'] ?? data['contact'] ?? '')
+                              .toString()
+                              .trim()
+                              .isNotEmpty)
+                          ? (data['phone_number'] ?? data['contact']).toString()
+                          : 'N/A'),
+                  const SizedBox(height: 15),
+                  _readonlyField(
+                      "Address",
+                      (data['address'] ?? '').toString().trim().isNotEmpty
+                          ? data['address'].toString()
+                          : 'N/A'),
+                  const SizedBox(height: 15),
+                  _readonlyField("Email", userEmail),
+                ],
               ),
             ),
-            const SizedBox(height: 30),
-            // Bottom button:
-            // Owner(email/password): label "Back to User List" but performs LOGOUT
-            // From AddUserManagement: label "Back to User List" and just pops back
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () async {
-                  if (showOwnerOptions) {
-                    await FirebaseAuth.instance.signOut();
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                    );
-                  } else {
-                    Navigator.pop(context);
-                  }
-                },
-                child: Text(showOwnerOptions ? "Logout" : "Back to User List"),
-              ),
+          ),
+          const SizedBox(height: 30),
+          // Firebase Auth (email/password): Users Show "Logout" Button and performs LOGOUT Functionality
+          // From AddUserManagement: Users "Back to User List"  Button and just pops back to the User List That is main Page
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () async {
+                if (showOwnerOptions) {
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  );
+                } else {
+                  Navigator.pop(context);
+                }
+              },
+              child: Text(showOwnerOptions ? "Logout" : "Back to User List"),
             ),
-          ],
-        ),
+          ),
+        ]),
       ),
     );
   }
